@@ -1,5 +1,7 @@
 package day170822;
 
+import day170821.Utils;
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Executor;
@@ -9,14 +11,17 @@ public class Worker implements Executor {
     private Queue<Runnable> tasks = new LinkedList<>();
 
     public Worker() {
-        new Thread(() -> {
-            process();
-        }).start();
+        new Thread(this::process).start();
     }
 
     @Override
     public void execute(Runnable task) {
-        tasks.offer(task);
+        synchronized (tasks) {
+            tasks.offer(task);
+            tasks.notify();
+            System.out.println("notified");
+            Utils.pause(3000);
+        }
     }
 
     private void process() {
